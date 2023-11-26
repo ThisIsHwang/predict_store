@@ -17,28 +17,16 @@ def haversine(lon1, lat1, lon2, lat2):
     R = 6371
     return R * c
 
-# Modified function to calculate weighted distribution of store types
-def get_weighted_distribution(row, data, max_radius=1.0):
-    # Define weights for different distance ranges
-    weight_within_05 = 2  # Higher weight for stores within 0.5 km
-    weight_within_1 = 1   # Lower weight for stores within 1 km
-
-    # Apply a mask to find stores within the specified maximum radius and calculate weights
-    mask = data.apply(lambda x: haversine(row['Longitude'], row['Latitude'], x['좌표정보(x)'], x['좌표정보(y)']), axis=1)
-    data['weight'] = mask.apply(lambda distance: weight_within_05 if distance <= 0.5 else (weight_within_1 if distance <= max_radius else 0))
-
-    # Filter out stores beyond the maximum radius
-    nearby_stores = data[data['weight'] > 0]
-
-    # Calculate the weighted distribution
-    weighted_counts = nearby_stores.groupby('업태구분명')['weight'].sum()
-    total_weight = weighted_counts.sum()
-    weighted_distribution = (weighted_counts / total_weight).to_dict()
-
-    return weighted_distribution
+# Determine the distribution of store types within a 0.5 km radius
+def get_distribution(row, data, radius=0.5):
+    # Apply a mask to find stores within the specified radius
+    mask = data.apply(lambda x: haversine(row['Longitude'], row['Latitude'], x['좌표정보(x)'], x['좌표정보(y)']) <= radius, axis=1)
+    nearby_stores = data[mask]
+    distribution = nearby_stores['업태구분명'].value_counts(normalize=True)
+    return distribution.to_dict()
 
 # Load the original dataset
-original_data_path = '/Users/sanakang/Desktop/predict_store/dataset/updated_diningcode_output.csv'
+original_data_path = '/Users/hwangyun/PycharmProjects/pred_loc/dataset/updated_diningcode_output.csv'
 df = pd.read_csv(original_data_path)
 
 # Filter the DataFrame to include only valid entries
@@ -49,7 +37,7 @@ filtered_df = df[(df['score'] > 0) & (df['category'].notnull())]
 # filtered_df.to_csv(filtered_data_path, index=False)
 
 # Load the filtered and merged dataset
-merged_data_path = "/Users/sanakang/Desktop/predict_store/dataset/final_merged_filtered_data.csv"
+merged_data_path = "/Users/hwangyun/PycharmProjects/pred_loc/final_merged_filtered_data.csv"
 data = pd.read_csv(merged_data_path)
 
 # Fill missing '업태구분명' values with '개방서비스명'
@@ -61,14 +49,14 @@ data = data[relevant_columns]
 
 # Calculate the distribution of nearby stores for each row
 # Note: This may be slow for large datasets; consider parallel processing methods if necessary
-results = [get_weighted_distribution(row, data) for _, row in tqdm(filtered_df.iterrows(), total=filtered_df.shape[0])]
+results = [get_distribution(row, data) for _, row in tqdm(filtered_df.iterrows(), total=filtered_df.shape[0])]
 
 # Create a DataFrame from the distribution results and combine it with the filtered data
 distribution_df = pd.DataFrame(results).fillna(0)
 filtered_df = pd.concat([filtered_df.reset_index(drop=True), distribution_df], axis=1)
 
 # Save the combined data with distribution information
-intermediate_data_path = '/Users/sanakang/Desktop/predict_store/dataset/inter_diningcode_dropped.csv'
+intermediate_data_path = '/Users/hwangyun/PycharmProjects/pred_loc/dataset/inter_diningcode.csv'
 filtered_df.to_csv(intermediate_data_path, index=False)
 
 # Load the data for the machine learning model
