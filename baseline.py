@@ -15,7 +15,7 @@ from sklearn.model_selection import cross_val_score, cross_val_predict
 # - Dataset: get_weighted_distribution() 함수 적용
 
 # 데이터 로드 및 전처리
-data = pd.read_csv('predict_store\dataset\inter_diningcode.csv')  # Update the path to your file
+data = pd.read_csv('/Users/sanakang/Downloads/predict_store/dataset/inter_diningcode_dropped_new.csv')  # Update the path to your file
 data['category'] = data['category'].str.split('>').str[-1]
 
 # 특징 및 레이블 준비

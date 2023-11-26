@@ -50,7 +50,7 @@ filtered_df = df[(df['score'] > 0) & (df['category'].notnull())]
 
 # Load the filtered and merged dataset
 merged_data_path = "/Users/sanakang/Desktop/predict_store/dataset/final_merged_filtered_data.csv"
-data = pd.read_csv(merged_data_path)
+data = pd.read_csv(merged_data_path, encoding='utf-8')
 
 # # Fill missing '업태구분명' values with '개방서비스명'
 # data['업태구분명'] = data['업태구분명'].fillna(data['개방서비스명'])
