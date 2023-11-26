@@ -37,9 +37,9 @@ X_test_scaled = scaler.transform(X_test)
 # SVM 모델 훈련 및 평가
 svm_model = SVC()
 svm_model.fit(X_train_scaled, y_train)
-kf = KFold(n_splits=3, shuffle=True, random_state=42)  # You can set the random_state for reproducibility
+kf = KFold(n_splits=3, shuffle=True, random_state=42)  #Cross Validation for k = 3
 # Perform k-fold cross-validation
-cv_results = cross_val_score(svm_model, X, y, cv=kf)
+cv_results = cross_val_score(svm_model, X, y, cv=kf)#getting cross validation scores
 #pca_scores[i, j] = accuracy_score(y_test, pca_y_pred_test)
 
 y_pred_test = svm_model.predict(X_test_scaled)
