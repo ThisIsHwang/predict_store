@@ -32,7 +32,7 @@ def get_distribution(row, data, radius=1.0):
     data = data[condition]
 
     mask = data.apply(lambda x: haversine(row['Longitude'], row['Latitude'], x['좌표정보(x)'], x['좌표정보(y)']) <= radius, axis=1)
-     
+    
     return mask
 
 # Load the original dataset
