@@ -6,6 +6,8 @@ from tqdm import tqdm
 import csv
 import time
 
+pd.options.mode.chained_assignment = None
+
 def circular_weight(distance):
     try:
         result = math.sqrt(1-distance**2)
@@ -13,10 +15,10 @@ def circular_weight(distance):
         print("error! {}".format(distance))
     return math.sqrt(1-distance**2)
 
-def gaussian_weight(x):
+def gaussian_weight(distance):
     mu = 0
     sigma = 0.5
-    return np.exp(-(x - mu)**2 / (2 * sigma**2))
+    return np.exp(-(distance - mu)**2 / (2 * sigma**2))
 
 # Define the Haversine formula for calculating the great-circle distance between two points on Earth
 def haversine(lon1, lat1, lon2, lat2):
@@ -52,7 +54,7 @@ def get_weighted_distribution(row, data, max_radius=1.0):
 
 
     mask = data.apply(lambda x: haversine(row['Longitude'], row['Latitude'], x['좌표정보(x)'], x['좌표정보(y)']), axis=1)
-    data['weight'] = mask.apply(lambda distance: circular_weight(distance = distance))
+    data['weight'] = mask.apply(lambda distance: gaussian_weight(distance = distance))
 
     nearby_stores = data[data['weight'] > 0]
 
@@ -63,7 +65,7 @@ def get_weighted_distribution(row, data, max_radius=1.0):
     return weighted_distribution
 
 # Load the original dataset
-original_data_path = 'updated_diningcode_output.csv'
+original_data_path = 'dataset/updated_diningcode_output.csv'
 df = pd.read_csv(original_data_path)
 
 # Filter the DataFrame to include only valid entries
@@ -88,7 +90,7 @@ for row in csv_reader:
 # filtered_df.to_csv(filtered_data_path, index=False)
 
 # Load the filtered and merged dataset
-merged_data_path = "final_merged_filtered_data.csv"
+merged_data_path = "dataset/final_merged_filtered_data.csv"
 data = pd.read_csv(merged_data_path)
 
 # Fill missing '업태구분명' values with '개방서비스명'
