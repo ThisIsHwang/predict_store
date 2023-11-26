@@ -8,13 +8,14 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from scipy import stats
 from tqdm import tqdm
-
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
 # Information
 # - Baseline: No PCA, SVM
 # - Dataset: get_weighted_distribution() 함수 적용
 
 # 데이터 로드 및 전처리
-data = pd.read_csv('/Users/sanakang/Desktop/predict_store/dataset/inter_diningcode_dropped.csv')  # Update the path to your file
+data = pd.read_csv('predict_store\dataset\inter_diningcode.csv')  # Update the path to your file
 data['category'] = data['category'].str.split('>').str[-1]
 
 # 특징 및 레이블 준비
@@ -36,10 +37,16 @@ X_test_scaled = scaler.transform(X_test)
 # SVM 모델 훈련 및 평가
 svm_model = SVC()
 svm_model.fit(X_train_scaled, y_train)
+kf = KFold(n_splits=3, shuffle=True, random_state=42)  # You can set the random_state for reproducibility
+# Perform k-fold cross-validation
+cv_results = cross_val_score(svm_model, X, y, cv=kf)
+#pca_scores[i, j] = accuracy_score(y_test, pca_y_pred_test)
+
 y_pred_test = svm_model.predict(X_test_scaled)
 
 # 성능 측정
-accuracy = accuracy_score(y_test, y_pred_test)
+#accuracy = accuracy_score(y_test, y_pred_test)
+accuracy = np.mean(cv_results)
 f1_micro = f1_score(y_test, y_pred_test, average='micro')
 f1_macro = f1_score(y_test, y_pred_test, average='macro')
 f1_weighted = f1_score(y_test, y_pred_test, average='weighted')
