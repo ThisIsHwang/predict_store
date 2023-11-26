@@ -10,12 +10,14 @@ from scipy import stats
 from tqdm import tqdm
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score, cross_val_predict
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
 # Information
 # - Baseline: No PCA, SVM
 # - Dataset: get_weighted_distribution() 함수 적용
 
 # 데이터 로드 및 전처리
-data = pd.read_csv('/Users/sanakang/Downloads/predict_store/dataset/inter_diningcode_dropped_new.csv')  # Update the path to your file
+data = pd.read_csv(r'predict_store\dataset\inter_diningcode_dropped.csv')  # Update the path to your file
 data['category'] = data['category'].str.split('>').str[-1]
 
 # 특징 및 레이블 준비
@@ -35,7 +37,9 @@ scaler = StandardScaler()
 #X_test_scaled = scaler.transform(X_test)
 
 # SVM 모델 훈련 및 평가
-svm_model = SVC()
+#svm_model = SVC()
+base_classifier = DecisionTreeClassifier()
+bagging_classifier = BaggingClassifier(base_classifier, n_estimators=10, random_state=42)
 #svm_model.fit(X_train_scaled, y_train)
 kf = KFold(n_splits=3, shuffle=True, random_state=42)  #Cross Validation for k = 3
 # Perform k-fold cross-validation
@@ -51,10 +55,10 @@ for train_index, test_index in kf.split(X):
     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
     # Fit the classifier on the training data
-    svm_model.fit(X_train_Scaled, y_train)
+    bagging_classifier.fit(X_train_Scaled, y_train)
 
     # Get predicted values for the test set in this fold
-    fold_y_pred = svm_model.predict(X_test_Scaled)
+    fold_y_pred = bagging_classifier.predict(X_test_Scaled)
     # Append the predicted values to the array
     all_y_pred = np.concatenate((all_y_pred, fold_y_pred))
     # 성능 측정
