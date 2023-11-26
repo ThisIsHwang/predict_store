@@ -52,12 +52,24 @@ filtered_df = df[(df['score'] > 0) & (df['category'].notnull())]
 merged_data_path = "/Users/sanakang/Desktop/predict_store/dataset/final_merged_filtered_data.csv"
 data = pd.read_csv(merged_data_path)
 
-# Fill missing '업태구분명' values with '개방서비스명'
-data['업태구분명'] = data['업태구분명'].fillna(data['개방서비스명'])
+# # Fill missing '업태구분명' values with '개방서비스명'
+# data['업태구분명'] = data['업태구분명'].fillna(data['개방서비스명'])
+
+# # Use only the relevant columns for further processing
+# relevant_columns = ['좌표정보(x)', '좌표정보(y)', '업태구분명']
+# data = data[relevant_columns]
 
 # Use only the relevant columns for further processing
-relevant_columns = ['좌표정보(x)', '좌표정보(y)', '업태구분명']
+relevant_columns = ['좌표정보(x)', '좌표정보(y)', '업태구분명', '개방서비스명']
 data = data[relevant_columns]
+
+# 집단급식소 = 병원, 사회복지시설, 어린이집, 산업체, 병원, etc.
+fnb_related = ['집단급식소', '제과점영업', '단란주점영업', '유흥주점영업', '관광식당', '관광유흥음식점업','외국인전용유흥음식점업','일반음식점','휴게음식점','대규모점포']
+
+# '개방서비스명'이 fnb_related에 포함되지 않는 경우 '업태구분명'을 '개방서비스명'으로 업데이트
+data.loc[~data['개방서비스명'].isin(fnb_related), '업태구분명'] = data['개방서비스명']
+
+data = data[['좌표정보(x)', '좌표정보(y)', '업태구분명']]
 
 # Calculate the distribution of nearby stores for each row
 # Note: This may be slow for large datasets; consider parallel processing methods if necessary
@@ -70,9 +82,7 @@ filtered_df = pd.concat([filtered_df.reset_index(drop=True), distribution_df], a
 # Save the combined data with distribution information
 intermediate_data_path = '/Users/sanakang/Desktop/predict_store/dataset/inter_diningcode_dropped.csv'
 filtered_df.to_csv(intermediate_data_path, index=False)
-
-# Load the data for the machine learning model
-data = pd.read_csv(intermediate_data_path)
+filtered_df.to_csv('/Users/sanakang/Desktop/predict_store/dataset/testtesttest.csv', index=False)
 
 # # Simplify the category labels by splitting on '>' and keeping the last element
 # data['category'] = data['category'].str.split('>').str[-1]
