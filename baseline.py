@@ -12,12 +12,21 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.ensemble import BaggingClassifier
 from sklearn.tree import DecisionTreeClassifier
-# Information
-# - Baseline: No PCA, SVM
-# - Dataset: get_weighted_distribution() 함수 적용
+# Baseline v3.1
+# - Model: BaggingClassifier
+# - Dataset(인허가): get_weighted_distribution() 함수 적용
+# - Dataset(다이닝코드): 영등포 + 종로
+# - PCA: No
 
+# 데이터 로드
 # 데이터 로드 및 전처리
-data = pd.read_csv(r'predict_store\dataset\inter_diningcode_dropped.csv')  # Update the path to your file
+youngdeungpo_data = pd.read_csv('/Users/sanakang/Downloads/predict_store/dataset/inter_diningcode_youngdeungpo_dropped.csv')  # Update the path to your file
+jongro_data = pd.read_csv('/Users/sanakang/Downloads/predict_store/dataset/inter_diningcode_jongro_dropped.csv')  # Update the path to your file
+
+# 데이터 병합
+data = pd.concat([youngdeungpo_data, jongro_data], ignore_index=True)
+
+# 데이터 전처리
 data['category'] = data['category'].str.split('>').str[-1]
 
 # 특징 및 레이블 준비
@@ -36,7 +45,7 @@ scaler = StandardScaler()
 #X_train_scaled = scaler.fit_transform(X_train)
 #X_test_scaled = scaler.transform(X_test)
 
-# SVM 모델 훈련 및 평가
+# 모델 훈련 및 평가
 #svm_model = SVC()
 base_classifier = DecisionTreeClassifier()
 bagging_classifier = BaggingClassifier(base_classifier, n_estimators=10, random_state=42)
