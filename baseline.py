@@ -20,8 +20,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 # 데이터 로드
 # 데이터 로드 및 전처리
-youngdeungpo_data = pd.read_csv('/Users/sanakang/Downloads/predict_store/dataset/inter_diningcode_youngdeungpo_dropped.csv')  # Update the path to your file
-jongro_data = pd.read_csv('/Users/sanakang/Downloads/predict_store/dataset/inter_diningcode_jongro_dropped.csv')  # Update the path to your file
+youngdeungpo_data = pd.read_csv('https://raw.githubusercontent.com/ThisIsHwang/predict_store/v3/dataset/inter_diningcode_youngdeungpo_dropped.csv')  # Update the path to your file
+jongro_data = pd.read_csv('https://raw.githubusercontent.com/ThisIsHwang/predict_store/v3/dataset/inter_diningcode_jongro_dropped.csv')  # Update the path to your file
 
 # 데이터 병합
 data = pd.concat([youngdeungpo_data, jongro_data], ignore_index=True)
@@ -37,13 +37,8 @@ X = data.drop(columns=[
 ])
 y = data['category']
 
-# 훈련 및 테스트 데이터 분할
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
-
 # 데이터 표준화
 scaler = StandardScaler()
-#X_train_scaled = scaler.fit_transform(X_train)
-#X_test_scaled = scaler.transform(X_test)
 
 # 모델 훈련 및 평가
 #svm_model = SVC()
