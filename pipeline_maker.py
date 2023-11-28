@@ -18,13 +18,16 @@ def haversine(lon1, lat1, lon2, lat2):
     return R * c
 
 def get_border(lon, lat):
-    # diff = 0.0001
-    # while haversine(lon, lat, lon+diff, lat) <= 1:
-    #     diff += 0.0001
-    diff = 0.0114
-    return lon-diff, lon+diff, lat-diff, lat+diff
+    diff_lon = 0.0001
+    while haversine(lon, lat, lon+diff_lon, lat) <= 1:
+        diff_lon += 0.0001
+    diff_lat = 0.0001
+    while haversine(lon, lat, lon, lat+diff_lat) <= 1:
+        diff_lat += 0.0001
+    
+    return lon-diff_lon, lon+diff_lon, lat-diff_lat, lat+diff_lat
 
-# Determine the distribution of store types within a 0.5 km radius
+# Determine the distribution of store types within a 1 km radius
 def get_distribution(row, data, radius=1.0):
     # Apply a mask to find stores within the specified radius
     lon1, lon2, lat1, lat2 = get_border(row['Longitude'], row['Latitude'])
@@ -35,8 +38,11 @@ def get_distribution(row, data, radius=1.0):
     
     return mask
 
+# pipeline file path
+pipeline_filename = 'dataset/process_pipeline_jongro_1124.csv'
+
 # Load the original dataset
-original_data_path = 'dataset/updated_diningcode_1124.csv'
+original_data_path = 'dataset/updated_diningcode_jongro_1124.csv'
 df = pd.read_csv(original_data_path)
 
 # Filter the DataFrame to include only valid entries
@@ -47,7 +53,7 @@ filtered_df = df[(df['score'] > 0) & (df['category'].notnull())]
 # filtered_df.to_csv(filtered_data_path, index=False)
 
 # Load the filtered and merged dataset
-merged_data_path = "dataset/final_merged_filtered_data.csv"
+merged_data_path = "dataset/final_merged_filtered_jongro_data.csv"
 data = pd.read_csv(merged_data_path)
 
 # drop '통신판매업'
@@ -63,16 +69,15 @@ data = data[relevant_columns]
 
 # Calculate the distribution of nearby stores for each row
 # Note: This may be slow for large datasets; consider parallel processing methods if necessary
-
+print(filtered_df)
 # results = [get_distribution(row, data) for _, row in tqdm(filtered_df.iterrows(), total=filtered_df.shape[0])]
 results = [get_distribution(row, data) for _, row in tqdm(filtered_df.iterrows(), total=filtered_df.shape[0])]
 selected_indices = []
 for mask in results:
     selected_indices.append([i for i, value in enumerate(mask) if value])
 
-csv_filename = 'dataset/process_pipeline2.csv'
 
-file = open(csv_filename, 'w', newline='', encoding='utf-8')
+file = open(pipeline_filename, 'w', newline='', encoding='utf-8')
 
 # CSV 파일을 쓰기 위한 writer 객체 생성
 csv_writer = csv.writer(file)
