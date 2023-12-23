@@ -18,14 +18,11 @@ def haversine(lon1, lat1, lon2, lat2):
     return R * c
 
 def get_border(lon, lat):
-    diff_lon = 0.0001
-    while haversine(lon, lat, lon+diff_lon, lat) <= 1:
-        diff_lon += 0.0001
-    diff_lat = 0.0001
-    while haversine(lon, lat, lon, lat+diff_lat) <= 1:
-        diff_lat += 0.0001
-    
-    return lon-diff_lon, lon+diff_lon, lat-diff_lat, lat+diff_lat
+    # diff = 0.0001
+    # while haversine(lon, lat, lon+diff, lat) <= 1:
+    #     diff += 0.0001
+    diff = 0.0114
+    return lon-diff, lon+diff, lat-diff, lat+diff
 
 # Determine the distribution of store types within a 1 km radius
 def get_distribution(row, data, radius=1.0):

@@ -38,7 +38,7 @@ def get_weighted_distribution(row, data, max_radius=1.0):
     return weighted_distribution
 
 # Load the original dataset
-original_data_path = '/Users/sanakang/Desktop/predict_store/dataset/updated_diningcode_output.csv'
+original_data_path = '/Users/hwangyun/PycharmProjects/predict_store/dataset/updated_diningcode_1124.csv'
 df = pd.read_csv(original_data_path)
 
 # Filter the DataFrame to include only valid entries
@@ -49,7 +49,7 @@ filtered_df = df[(df['score'] > 0) & (df['category'].notnull())]
 # filtered_df.to_csv(filtered_data_path, index=False)
 
 # Load the filtered and merged dataset
-merged_data_path = "/Users/sanakang/Desktop/predict_store/dataset/final_merged_filtered_data.csv"
+merged_data_path = "/Users/hwangyun/PycharmProjects/predict_store/dataset/final_merged_filtered_data.csv"
 data = pd.read_csv(merged_data_path, encoding='utf-8')
 
 # # Fill missing '업태구분명' values with '개방서비스명'
@@ -80,9 +80,9 @@ distribution_df = pd.DataFrame(results).fillna(0)
 filtered_df = pd.concat([filtered_df.reset_index(drop=True), distribution_df], axis=1)
 
 # Save the combined data with distribution information
-intermediate_data_path = '/Users/sanakang/Desktop/predict_store/dataset/inter_diningcode_dropped.csv'
+intermediate_data_path = '/Users/hwangyun/PycharmProjects/predict_store/dataset/inter_diningcode_dropped.csv'
 filtered_df.to_csv(intermediate_data_path, index=False)
-filtered_df.to_csv('/Users/sanakang/Desktop/predict_store/dataset/testtesttest.csv', index=False)
+#filtered_df.to_csv('/Users/sanakang/Desktop/predict_store/dataset/testtesttest.csv', index=False)
 
 # # Simplify the category labels by splitting on '>' and keeping the last element
 # data['category'] = data['category'].str.split('>').str[-1]
