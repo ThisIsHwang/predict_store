@@ -10,7 +10,7 @@ class Model:
     def __init__(self):
         self.scaler = StandardScaler()
         self.base_classifier = DecisionTreeClassifier()
-        self.bagging_classifier = BaggingClassifier(self.base_classifier, n_estimators=10, random_state=42)
+        self.bagging_classifier = BaggingClassifier(self.base_classifier, n_estimators=10, random_state=42, n_jobs=-1)
         self.kf = KFold(n_splits=3, shuffle=True, random_state=42)
 
     def preprocess_data(self, data):
