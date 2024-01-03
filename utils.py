@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
+import time
 import math
+import dask.dataframe as dd
+from dask.distributed import Client
 
 class Utils:
     def __init__(self):
@@ -15,16 +18,30 @@ class Utils:
                                 "커피숍", "편의점", "기숙사", "제재업", "까페", "다방", "병원", "분식", "약국", "요정", "의원", "일식", "학교",
                                 "한식", "횟집", "시장", "극장"]
         
-        self.distribution_data_path = ['data/final_merged_filtered_youngdeungpo_data.csv',
-                                       'data/final_merged_filtered_jongro_data.csv']
+        self.distribution_data_path = ['data/converted_filtered_data.csv']
     
     # private function
     def __load_data(self, path):
-        data = pd.read_csv(path, low_memory=False)
-        data = data[['좌표정보(x)', '좌표정보(y)', '업태구분명', '영업상태명', '사업장명']]
+        dtype = {'업태구분명': 'object'}
+        usecols = ['좌표정보(x)', '좌표정보(y)', '업태구분명', '영업상태명', '사업장명']
+        data = dd.read_csv(path, assume_missing=True, usecols=usecols, dtype=dtype)
         data = data[data['영업상태명'] == '영업/정상']
+        data = data.compute()
         return data
     
+    # utils = Utils()
+    # utils.load_data()
+    # Data can be preloaded.
+    # Even if there is no data loaded because load_data() is not running, cnt_distribution() can check and load it.
+    # Therefore, it can be used when the user wants to load data in the background before running cnt_distribution().
+    def load_data(self, path=None):
+        if not hasattr(self, 'data'):
+            if path is None:
+                path = self.distribution_data_path
+            self.data = pd.concat([self.__load_data(path) for path in self.distribution_data_path], ignore_index=True)
+            self.data = self.data.drop_duplicates()
+            self.distribution_data_path = None
+
     # private function
     def __vectorized_haversine(self, lat1, lon1, lat2_array, lon2_array):
         lon1, lat1, lon2_array, lat2_array = np.radians(lon1), np.radians(lat1), np.radians(lon2_array), np.radians(lat2_array)
@@ -42,10 +59,7 @@ class Utils:
     # output: dictionary
     # ex) ({"병원" : 1, "주차장" : 2, "교회" : 1, …})
     def cnt_distribution(self, lat, lon, rad):
-        if not hasattr(self, 'data'):
-            self.data = pd.concat([self.__load_data(path) for path in self.distribution_data_path], ignore_index=True)
-            self.data = self.data.drop_duplicates()
-            self.distribution_data_path = None
+        self.load_data()
 
         distances = self.__vectorized_haversine(lat, lon, self.data['좌표정보(y)'].values, self.data['좌표정보(x)'].values)
         mask = distances < rad
@@ -55,3 +69,11 @@ class Utils:
         for value in self.commercial_list:
             result[value] = data[data['업태구분명'] == value].shape[0]
         return result
+
+start_time = time.time()
+utils = Utils()
+utils.load_data()
+print(f"{time.time() - start_time}")
+
+print(utils.cnt_distribution(37.519939, 126.904052, 1))
+print(utils.cnt_distribution(37.519939, 126.904052, 1))
