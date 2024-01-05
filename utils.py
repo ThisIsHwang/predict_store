@@ -68,8 +68,83 @@ class Utils:
         return result
 
 # Example usage
-    
+
 # utils = Utils()
 # utils.load_data()
 # print(utils.cnt_distribution(37.519939, 126.904052, 1))
 # print(utils.cnt_distribution(37.519939, 126.904052, 1))
+import pandas as pd
+
+
+def process_hashes(data):
+    data['hashes'] = data['hashes'].str.strip('[]').str.split(',')
+    all_hashes = set()
+    for hashes in data['hashes']:
+        all_hashes.update(hashes)
+    all_hashes.discard('')
+    for hash in all_hashes:
+        data["whether_" + hash] = data['hashes'].apply(lambda x: 1 if hash in x else 0)
+    data.drop('hashes', axis=1, inplace=True)
+    return data
+
+
+def load_data():
+    data_folder = "data/"
+    files = ['inter_diningcode_youngdeungpo_dropped.csv', 'inter_diningcode_jongro_dropped.csv',
+             'inter_hashes_youngdeungpo_dropped.csv', 'inter_hashes_jongro_dropped.csv']
+
+    datasets = [pd.read_csv(data_folder + file) for file in files]
+
+    for dataset in datasets:
+        columns_to_drop = ['categories', 'Info Title', 'Title Place', 'score', 'userScore', 'heart',
+                           'title', 'address', 'roadAddress', 'mapx', 'mapy']
+        dataset.drop(columns=columns_to_drop, inplace=True)
+
+    youngdeungpo_data, jongro_data, youngdeungpo_hashes, jongro_hashes = datasets
+    youngdeungpo_data = apply_hashes_processing(youngdeungpo_data)
+    jongro_data = apply_hashes_processing(jongro_data)
+    youngdeungpo_data = pd.merge(youngdeungpo_data, youngdeungpo_hashes,
+                                 on=['Title', 'Latitude', 'Longitude', 'category', 'hashes'], how='inner')
+    jongro_data = pd.merge(jongro_data, jongro_hashes, on=['Title', 'Latitude', 'Longitude', 'category', 'hashes'], how='inner')
+
+    youngdeungpo_data.drop_duplicates(subset=['Title', 'Latitude', 'Longitude', 'category'], inplace=True)
+    jongro_data.drop_duplicates(subset=['Title', 'Latitude', 'Longitude', 'category'], inplace=True)
+
+    data = pd.concat([youngdeungpo_data, jongro_data], ignore_index=True)
+
+    data['category'] = data['category'].str.split('>').str[-1]
+
+    data_for_hash = process_hashes(data.copy(deep=True))
+
+    data_for_type = data.drop(columns=['hashes'])
+    data_for_type.fillna(0, inplace=True)
+    data_for_hash.fillna(0, inplace=True)
+
+    return data_for_type, data_for_hash
+
+def process_hashes_string(hashes_str):
+    """
+    Convert a comma-separated string into a list of non-empty items,
+    unless it's already in a list-like format.
+
+    :param hashes_str: A string containing items separated by commas or a string representation of a list.
+    :return: A list of non-empty items, or the original string if it's already list-like.
+    """
+    # Check if the string is already in a list-like format
+    if hashes_str.startswith('[') and hashes_str.endswith(']'):
+        return hashes_str
+
+    # Split the string by commas and strip whitespace
+    items = [item.strip() for item in hashes_str.split(',') if item.strip()]
+    return str(items)
+
+def apply_hashes_processing(df, column_name='hashes'):
+    """
+    Apply the hashes processing to a specific column in a DataFrame.
+
+    :param df: The DataFrame to process.
+    :param column_name: The name of the column containing the hashes.
+    :return: A DataFrame with the processed column.
+    """
+    df[column_name] = df[column_name].apply(process_hashes_string)
+    return df
