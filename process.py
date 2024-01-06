@@ -31,7 +31,7 @@ class Process:
             data = data[relevant_columns]
             return data
 
-        def __init__(self, param = fill_all):
+        def __init__(self, param=fill_all):
             self.param = param
 
         def modify_feature(self, data):
@@ -336,9 +336,9 @@ def main():
 
     process = Process()
 
-    process.feature_param = Process.Feature()
-    process.weight_param = Process.Weight()
-    process.distribution_param = Process.Distribution()
+    process.feature_param = Process.Feature(param=Process.Feature.drop_unrelated)
+    process.weight_param = Process.Weight(param=Process.Weight.gaussian_weight)
+    process.distribution_param = Process.Distribution(fnb_related=True, drop_mail_order=True)
     
     # Above code is same to this code
     # process.feature_param = Process.Feature(Process.Feature.fill_all)
@@ -348,17 +348,17 @@ def main():
     #     fnb_related=False
     # )
 
-    commercial_data_path = 'data/updated_diningcode_youngdeungpo_1124.csv'
-    local_data_path = 'data/final_merged_filtered_youngdeungpo_data.csv'
-    result_data_path = 'data/inter_diningcode_youngdeungpo_dropped.csv'
+    commercial_data_path = 'data/updated_diningcode_gangnam_20241.csv'
+    local_data_path = 'data/final_merged_filtered_gangnam_data_20241.csv'
+    result_data_path = 'data/inter_diningcode_gangnam_dropped_20241.csv'
     process.process_data(commercial_data_path, local_data_path, result_data_path)
-    process.process_data(commercial_data_path, local_data_path, result_data_path)
+    #process.process_data(commercial_data_path, local_data_path, result_data_path)
 
 
     hash_process = HashProcess()
 
     hash_process.feature_param = HashProcess.Feature()
-    hash_process.weight_param = HashProcess.Weight()
+    hash_process.weight_param = HashProcess.Weight(param=HashProcess.Weight.gaussian_weight)
     # Distribution todo!()
     # hash_process.distribution_param = HashProcess.Distribution()
     
@@ -370,10 +370,10 @@ def main():
     # )
     
     
-    hash_commercial_data_path = 'data/updated_diningcode_youngdeungpo_1124.csv'
-    hash_local_data_path = 'data/updated_diningcode_youngdeungpo_1124.csv'
-    hash_result_data_path = 'data/inter_hashes_youngdeungpo_dropped.csv'
-    # hash_process.process_data(hash_commercial_data_path, hash_local_data_path, hash_result_data_path)
+    hash_commercial_data_path = 'data/updated_diningcode_gangnam_20241.csv'
+    hash_local_data_path = 'data/updated_diningcode_gangnam_20241.csv'
+    hash_result_data_path = 'data/inter_hashes_gangnam_dropped_20241.csv'
+    hash_process.process_data(hash_commercial_data_path, hash_local_data_path, hash_result_data_path)
 
 if __name__ == '__main__':
     main()

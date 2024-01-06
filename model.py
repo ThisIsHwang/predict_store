@@ -3,21 +3,22 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score, f1_score, jaccard_score
-from sklearn.ensemble import BaggingClassifier
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
-from lightgbm import LGBMClassifier
 from concurrent.futures import ProcessPoolExecutor
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold
+# using bagging classifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 class ModelForPredictStoreType:
     def __init__(self):
         self.scaler = StandardScaler()
         self.num_classes = None  # This will hold the number of unique classes
-        self.xgb_classifier = xgb.XGBClassifier(n_estimators=100, random_state=42, n_jobs=-1, eval_metric='mlogloss')
+        #self.xgb_classifier = xgb.XGBClassifier(n_estimators=100, random_state=42, n_jobs=-1, eval_metric='mlogloss')
+        self.xgb_classifier = BaggingClassifier(base_estimator=DecisionTreeClassifier(), n_estimators=100, random_state=42, n_jobs=-1)
         self.kf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
     def preprocess_data(self, data):

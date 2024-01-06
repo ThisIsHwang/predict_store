@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import numpy as np
 import math
@@ -12,7 +14,7 @@ from dataclasses import dataclass
 import concurrent.futures
 from functools import partial
 import copy
-from model import Model
+from model import ModelForPredictStoreType, ModelForPredictStoreHashes
 
 # processing function
 # return : cache_path_list
@@ -45,7 +47,9 @@ def processing(commercial_data_path, local_data_path, cache_index = ""):
 
                 cache = '{}_{}+{}+{}.csv'.format(cache_index, feature_param.__name__, weight_param.__name__, '+'.join(process.distribution_param.get_true_attributes()))
                 result_data_path = 'cache/'+cache
-                process.process_data(data_folder + commercial_data_path, data_folder + local_data_path, result_data_path)
+                # if result_data_path is already exist, skip this process
+                if not os.path.isfile(result_data_path):
+                    process.process_data(data_folder + commercial_data_path, data_folder + local_data_path, result_data_path)
 
                 cache_path_list.append((cache, feature_param.__name__, weight_param.__name__, '+'.join(process.distribution_param.get_true_attributes())))
                 print('{} is stored in cache file'.format(cache))
@@ -73,8 +77,9 @@ def hash_processing(commercial_data_path, local_data_path, cache_index = ""):
 
             cache = '{}_hash_{}+{}.csv'.format(cache_index, feature_param.__name__, weight_param.__name__)
             result_data_path = 'cache/'+cache
-            process.process_data(data_folder + commercial_data_path, data_folder + local_data_path, result_data_path)
-
+            if not os.path.isfile(result_data_path):
+                process.process_data(data_folder + commercial_data_path, data_folder + local_data_path, result_data_path)
+            #process.process_data(data_folder + commercial_data_path, data_folder + local_data_path, result_data_path)
             cache_path_list.append((cache, feature_param.__name__, weight_param.__name__, None))
             print('{} is stored in cache file'.format(cache))
 
@@ -125,17 +130,20 @@ if __name__ == '__main__':
 
     area_idx_list = [
         "youngdeungpo",
-        "jongro"
+        "jongro",
+        "gangnam"
     ]
 
     data_folder = "data/"
     commercial_data_path_list = [
         "updated_diningcode_youngdeungpo_1124.csv",
-        "updated_diningcode_jongro_1124.csv"
+        "updated_diningcode_jongro_1124.csv",
+        "updated_diningcode_gangnam_20241.csv"
     ]
     local_data_path_list = [
-        "final_merged_filtered_youngdeungpo_data.csv",
-        "final_merged_filtered_jongro_data.csv"
+        "final_merged_filtered_youngdeungpo_data_20241.csv",
+        "final_merged_filtered_jongro_data_20241.csv",
+        "final_merged_filtered_gangnam_data_20241.csv"
     ]
 
     processed_data_path_list = []
@@ -166,12 +174,11 @@ if __name__ == '__main__':
     current_best = ""
     for processed_data_paths in processed_data_path_list:
         data = load_data(processed_data_paths, hash_path_list)
-        
         start_time = time.time()
         param_name = get_param_name(processed_data_paths)
         print("Train {} ...".format(param_name))
 
-        model = Model()
+        model = ModelForPredictStoreType()
         X, y = model.preprocess_data(data)
         mean_scores = model.train_and_evaluate(X, y)
 

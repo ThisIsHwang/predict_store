@@ -90,8 +90,8 @@ def process_hashes(data):
 
 def load_data():
     data_folder = "data/"
-    files = ['inter_diningcode_youngdeungpo_dropped.csv', 'inter_diningcode_jongro_dropped.csv',
-             'inter_hashes_youngdeungpo_dropped.csv', 'inter_hashes_jongro_dropped.csv']
+    files = ['inter_diningcode_youngdeungpo_dropped_20241.csv', 'inter_diningcode_jongro_dropped_20241.csv', 'inter_diningcode_gangnam_dropped_20241.csv',
+             'inter_hashes_youngdeungpo_dropped_20241.csv', 'inter_hashes_jongro_dropped_20241.csv', 'inter_hashes_gangnam_dropped_20241.csv']
 
     datasets = [pd.read_csv(data_folder + file) for file in files]
 
@@ -100,17 +100,22 @@ def load_data():
                            'title', 'address', 'roadAddress', 'mapx', 'mapy']
         dataset.drop(columns=columns_to_drop, inplace=True)
 
-    youngdeungpo_data, jongro_data, youngdeungpo_hashes, jongro_hashes = datasets
-    youngdeungpo_data = apply_hashes_processing(youngdeungpo_data)
-    jongro_data = apply_hashes_processing(jongro_data)
+    youngdeungpo_data, jongro_data, gangnam_data, youngdeungpo_hashes, jongro_hashes, gangnam_hashes = datasets
+
+    # youngdeungpo_data = apply_hashes_processing(youngdeungpo_data)
+    # jongro_data = apply_hashes_processing(jongro_data)
+    # gangnam_data = apply_hashes_processing(gangnam_data)
+
     youngdeungpo_data = pd.merge(youngdeungpo_data, youngdeungpo_hashes,
                                  on=['Title', 'Latitude', 'Longitude', 'category', 'hashes'], how='inner')
     jongro_data = pd.merge(jongro_data, jongro_hashes, on=['Title', 'Latitude', 'Longitude', 'category', 'hashes'], how='inner')
+    gangnam_data = pd.merge(gangnam_data, gangnam_hashes, on=['Title', 'Latitude', 'Longitude', 'category','hashes'], how='inner')
 
     youngdeungpo_data.drop_duplicates(subset=['Title', 'Latitude', 'Longitude', 'category'], inplace=True)
     jongro_data.drop_duplicates(subset=['Title', 'Latitude', 'Longitude', 'category'], inplace=True)
+    gangnam_data.drop_duplicates(subset=['Title', 'Latitude', 'Longitude', 'category'], inplace=True)
 
-    data = pd.concat([youngdeungpo_data, jongro_data], ignore_index=True)
+    data = pd.concat([youngdeungpo_data, jongro_data, gangnam_data], ignore_index=True)
 
     data['category'] = data['category'].str.split('>').str[-1]
 
