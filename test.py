@@ -136,8 +136,8 @@ if __name__ == '__main__':
 
     data_folder = "data/"
     commercial_data_path_list = [
-        "updated_diningcode_youngdeungpo_1124.csv",
-        "updated_diningcode_jongro_1124.csv",
+        "updated_diningcode_youngdeungpo_20241.csv",
+        "updated_diningcode_jongro_20241.csv",
         "updated_diningcode_gangnam_20241.csv"
     ]
     local_data_path_list = [

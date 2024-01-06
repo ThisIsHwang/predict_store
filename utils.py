@@ -82,9 +82,21 @@ def process_hashes(data):
     for hashes in data['hashes']:
         all_hashes.update(hashes)
     all_hashes.discard('')
+
+    # Use a dictionary to collect new columns
+    new_cols_data = {}
+
     for hash in all_hashes:
-        data["whether_" + hash] = data['hashes'].apply(lambda x: 1 if hash in x else 0)
+        # Update the dictionary with the new column
+        new_cols_data["whether_" + hash] = data['hashes'].apply(lambda x: 1 if hash in x else 0)
+
+    # Convert the dictionary to a DataFrame
+    new_cols = pd.DataFrame(new_cols_data, index=data.index)
+
+    # Concatenate the new columns with the original data
+    data = pd.concat([data, new_cols], axis=1)
     data.drop('hashes', axis=1, inplace=True)
+
     return data
 
 

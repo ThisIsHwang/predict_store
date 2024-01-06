@@ -1,3 +1,6 @@
+import os
+
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
@@ -20,6 +23,7 @@ class ModelForPredictStoreType:
         #self.xgb_classifier = xgb.XGBClassifier(n_estimators=100, random_state=42, n_jobs=-1, eval_metric='mlogloss')
         self.xgb_classifier = BaggingClassifier(base_estimator=DecisionTreeClassifier(), n_estimators=100, random_state=42, n_jobs=-1)
         self.kf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+        self.label_encoder = None
 
     def preprocess_data(self, data):
         data = data.dropna(axis=1)
@@ -74,11 +78,41 @@ class ModelForPredictStoreType:
 
         mean_scores = np.mean(scores, axis=0)
         return mean_scores
+
+    def train(self, X, y):
+        X_scaled = self.scaler.fit_transform(X)
+        self.xgb_classifier.fit(X_scaled, y)
+        print("Model training completed.")
+
+    def save_model(self, directory='model_weights'):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        joblib.dump(self.xgb_classifier, os.path.join(directory, 'store_type_model.pkl'))
+        joblib.dump(self.label_encoder, os.path.join(directory, 'store_type_label_encoder.pkl'))
+        joblib.dump(self.scaler, os.path.join(directory, 'store_type_scaler.pkl'))
+
+
+
+    def load_model(self, directory='model_weights', filename='store_type_model.pkl'):
+        model_path = os.path.join(directory, filename)
+        scaler_path = os.path.join(directory, 'store_type_scaler.pkl')
+        label_encoder_path = os.path.join(directory, 'store_type_label_encoder.pkl')
+
+        if os.path.exists(model_path) and os.path.exists(scaler_path) and os.path.exists(label_encoder_path):
+            self.xgb_classifier = joblib.load(model_path)
+            self.label_encoder = joblib.load(label_encoder_path)
+            self.scaler = joblib.load(scaler_path)
+            print("Model and associated components loaded successfully.")
+        else:
+            raise Exception("Model files not found.")
+
+
 class ModelForPredictStoreHashes:
     def __init__(self):
         self.scaler = StandardScaler()
-        self.classifier = OneVsRestClassifier(LogisticRegression(max_iter=1000,random_state=42, n_jobs=-1), n_jobs=-1)
+        self.classifier = OneVsRestClassifier(DecisionTreeClassifier(random_state=42), n_jobs=-1)
         self.kf = KFold(n_splits=3, shuffle=True, random_state=42)
+        self.y_columns = None
 
     def preprocess_data(self, data):
         data = data.dropna(axis=1)
@@ -113,3 +147,28 @@ class ModelForPredictStoreHashes:
 
         mean_jaccard = np.mean(jaccard_scores)
         return mean_jaccard
+
+    def save_model(self, directory='model_weights'):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        joblib.dump(self.classifier, os.path.join(directory, 'store_hashes_model.pkl'))
+        joblib.dump(self.scaler, os.path.join(directory, 'store_hashes_scaler.pkl'))
+        joblib.dump(self.y_columns, os.path.join(directory, 'store_hashes_y_columns.pkl'))
+        #joblib.dump(self.label_encoder, os.path.join(directory, 'store_hashes_label_encoder.pkl'))
+
+    def load_model(self, directory='model_weights', filename='store_hashes_model.pkl'):
+        model_path = os.path.join(directory, filename)
+        if os.path.exists(model_path):
+            self.classifier = joblib.load(model_path)
+            #self.label_encoder = joblib.load(os.path.join(directory, 'store_hashes_label_encoder.pkl'))
+            self.scaler = joblib.load(os.path.join(directory, 'store_hashes_scaler.pkl'))
+            self.y_columns = joblib.load(os.path.join(directory, 'store_hashes_y_columns.pkl'))
+            print("Model loaded successfully.")
+        else:
+            raise Exception("Hash Model file not found.")
+
+    def train(self, X, y):
+        X_scaled = self.scaler.fit_transform(X)
+        self.y_columns = y.columns
+        self.classifier.fit(X_scaled, y)
+        print("Model training completed.")

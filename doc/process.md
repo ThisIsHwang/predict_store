@@ -21,7 +21,7 @@ process.distribution_param = Process.Distribution()
     #     fnb_related=False
     # )
 
-commercial_data_path = '{your commercial data path! ex: data/updated_diningcode_youngdeungpo_1124.csv}'
+commercial_data_path = '{your commercial data path! ex: data/updated_diningcode_youngdeungpo_20241.csv}'
 local_data_path = '{your local data path! ex: data/final_merged_filtered_youngdeungpo_data_20241.csv}'
 result_data_path = '{your result data path! ex: data/inter_diningcode_youngdeungpo_dropped.csv}'
 process.process_data(commercial_data_path, local_data_path, result_data_path)
@@ -48,8 +48,8 @@ hash_process.weight_param = HashProcess.Weight()
     # )
 
 
-commercial_data_path = '{your commercial data path! ex: data/updated_diningcode_youngdeungpo_1124.csv}'
-local_data_path = '{your local data path! ex: data/updated_diningcode_youngdeungpo_1124.csv}'
+commercial_data_path = '{your commercial data path! ex: data/updated_diningcode_youngdeungpo_20241.csv}'
+local_data_path = '{your local data path! ex: data/updated_diningcode_youngdeungpo_20241.csv}'
 result_data_path = '{your result data path! ex: data/inter_hashes_diningcode_youngdeungpo_dropped.csv}'
 hash_process.process_data(commercial_data_path, local_data_path, result_data_path)
 ```
