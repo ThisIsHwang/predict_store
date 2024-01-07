@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from model import ModelForPredictStoreType, ModelForPredictStoreHashes
-from utils import load_data, Utils
+from utils import load_data
 from process import Process, HashProcess
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
@@ -10,7 +10,6 @@ class RecommendationService:
     def __init__(self):
         self.model_store_type = ModelForPredictStoreType()
         self.model_store_hashes = ModelForPredictStoreHashes()
-        self.utils = Utils()
         self.process = Process()
         self.process.feature_param = Process.Feature(param=Process.Feature.drop_unrelated)
         self.process.weight_param = Process.Weight(param=Process.Weight.gaussian_weight)
@@ -45,12 +44,15 @@ class RecommendationService:
         # Placeholder for preprocessing logic
         # This would involve creating a data frame similar to the training data but for the input location
         row = {"Latitude": latitude, "Longitude": longitude}
-        commercial_data_path = f'data/updated_diningcode_{location_type}_20241.csv'
-        local_data_path = f'data/final_merged_filtered_{location_type}_data_20241.csv'
-        result_data_path = f'data/inter_diningcode_{location_type}_dropped_20241.csv'
-        hash_commercial_data_path = f'data/updated_diningcode_{location_type}_20241.csv'
-        hash_local_data_path = f'data/updated_diningcode_{location_type}_20241.csv'
-        hash_result_data_path = f'data/inter_hashes_{location_type}_dropped_20241.csv'
+        
+        DATA_PATH = 'data/'
+        
+        commercial_data_path = DATA_PATH+f'updated_diningcode_{location_type}_20241.csv'
+        local_data_path = DATA_PATH+f'final_merged_filtered_{location_type}_data_20241.csv'
+        result_data_path = DATA_PATH+f'inter_diningcode_{location_type}_dropped_20241.csv'
+        hash_commercial_data_path = DATA_PATH+f'updated_diningcode_{location_type}_20241.csv'
+        hash_local_data_path = DATA_PATH+f'updated_diningcode_{location_type}_20241.csv'
+        hash_result_data_path = DATA_PATH+f'inter_hashes_{location_type}_dropped_20241.csv'
         preprocessed_type_data = self.process.process_row(commercial_data_path, local_data_path, result_data_path, row)
         preprocessed_hash_data = self.hash_process.process_row(hash_commercial_data_path, hash_local_data_path, hash_result_data_path, row)
         return preprocessed_type_data, preprocessed_hash_data
