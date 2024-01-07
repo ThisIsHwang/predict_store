@@ -59,6 +59,23 @@ class RecommendationService:
 
     def get_top_5_recommendations(self, latitude, longitude):
         # Preprocess location data
+        #youngdeungpo = (merged_df['좌표정보(y)'] >= 37.4789987952223) & (merged_df['좌표정보(y)'] <= 37.5548515573392) & \
+            #(merged_df['좌표정보(x)'] >= 126.873119215493) & (merged_df['좌표정보(x)'] <= 126.950796763912)
+        #jongro = (merged_df['좌표정보(y)'] >= 37.56336469999967) & (merged_df['좌표정보(y)'] <= 37.64290239999954) & \
+        #(merged_df['좌표정보(x)'] >= 126.93943557353703) & (merged_df['좌표정보(x)'] <= 127.02377357353774)
+        #gangnam = (merged_df['좌표정보(y)'] >= 37.44908183324762) & (merged_df['좌표정보(y)'] <= 37.53075444273274) & \
+        #          (merged_df['좌표정보(x)'] >= 126.97612011196603) & (merged_df['좌표정보(x)'] <= 127.08357120788159)
+        if (latitude >= 37.4789987952223) & (latitude <= 37.5548515573392) & \
+            (longitude >= 126.873119215493) & (longitude <= 126.950796763912):
+            location_type = 'youngdeungpo'
+        elif (latitude >= 37.56336469999967) & (latitude <= 37.64290239999954) & \
+            (longitude >= 126.93943557353703) & (longitude <= 127.02377357353774):
+            location_type = 'jongro'
+        elif (latitude >= 37.44908183324762) & (latitude <= 37.53075444273274) & \
+            (longitude >= 126.97612011196603) & (longitude <= 127.08357120788159):
+            location_type = 'gangnam'
+        else:
+            raise Exception("Location is not available.")
         preprocessed_type_data, preprocessed_hash_data = self._preprocess_location(latitude, longitude)
 
         # Convert preprocessed data to DataFrame
